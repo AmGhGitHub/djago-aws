@@ -4,19 +4,14 @@ services:
   app:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./docker/local/django/Dockerfile
     ports:
       - 8000:8000
     volumes:
       - ./app:/app
       - ./data/web:/vol/web
-    environment:
-      - SECRET_KEY=devsecretkey
-      - DEBUG=1
-      - DB_HOST=db #the name of the service we want to connect to
-      - DB_NAME=devdb
-      - DB_USER=devuser
-      - DB_PASS=changeme
+    env_file:
+      - ./.envs/.local/.django
     command: >
       sh -c "python manage.py wait_for_db &&
              python manage.py migrate &&
@@ -25,8 +20,8 @@ services:
       - db
 
   db:
-    image: postgres:13-alpine
-    environment:
-      - POSTGRES_DB=devdb
-      - POSTGRES_USER=devuser
-      - POSTGRES_PASSWORD=changeme
+    build:
+      context: .
+      dockerfile: ./docker/local/postgres/Dockerfile
+    env_file:
+      - ./.envs/.local/.postgres
